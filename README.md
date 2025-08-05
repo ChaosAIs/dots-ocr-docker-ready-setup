@@ -10,6 +10,7 @@ This repository provides a Docker Compose configuration that simplifies the depl
 
 - Docker and Docker Compose installed
 - NVIDIA GPU with Docker GPU support (nvidia-docker2)
+- **Hardware Requirement**: RTX3060 with 12G VRAM (minimum)
 - Python 3.x for downloading model weights
 
 ## Setup Instructions
@@ -32,22 +33,33 @@ python3 tools/download_model.py
 python3 tools/download_model.py --type modelscope
 ```
 
-### 2. Copy Model Files
+### 2. Create Model Directory
+
+First, create the model directory structure in your current project root folder:
+
+```bash
+# Navigate to your project root directory
+cd /path/to/dots-ocr-docker-ready-setup
+
+# Create the model directory structure
+mkdir -p model/weights
+```
+
+### 3. Copy Model Files
 
 After downloading the model weights, copy the downloaded files to the current project's model folder:
 
 ```bash
-# Create the model directory structure
-mkdir -p model/weights
-
 # Copy the downloaded model files to the project directory
 # Replace 'path/to/downloaded/DotsOCR' with the actual path where models were downloaded
 cp -r path/to/downloaded/DotsOCR model/weights/
 ```
 
-### 3. Configure GPU Settings
+### 4. Configure Docker Settings
 
-Edit the `docker-compose.yml` file to match your GPU configuration:
+Edit the `docker-compose.yml` file to customize your configuration:
+
+#### GPU Configuration
 
 ```yaml
 deploy:
@@ -59,7 +71,31 @@ deploy:
           capabilities: [gpu]
 ```
 
-### 4. Run the Service
+#### Port Configuration
+
+You can modify the exposed port if your local port 8000 is already in use:
+
+```yaml
+ports:
+  - "8001:8000" # Change 8001 to any available port on your system
+```
+
+#### Model Name Configuration
+
+You can customize the LLM model name from the default "dots_ocr" to a better name:
+
+```yaml
+command: [
+    # ... other parameters ...
+    "--served-model-name",
+    "your_custom_model_name", # Change this to your preferred name
+    # ... other parameters ...
+  ]
+```
+
+**Important Note**: If you change the model name, you need to update the corresponding code in the original dots.ocr project to use the new model name when making API calls.
+
+### 5. Run the Service
 
 Start the dots.ocr service using Docker Compose:
 
