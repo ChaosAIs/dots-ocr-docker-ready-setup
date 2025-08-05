@@ -1,0 +1,30 @@
+services:
+  vllm_llm_model:
+    build: .
+    runtime: nvidia
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ['0']  # Use GPU 8 (9th GPU)
+              capabilities: [gpu]
+    ipc: host
+    command: [
+      "/app/weights/DotsOCR",
+      "--host", "0.0.0.0",
+      "--port", "8000",
+      "--tensor-parallel-size", "1",
+      "--gpu-memory-utilization", "0.95",
+      "--max-model-len", "72768",
+      "--max-num-seqs", "2",
+      "--chat-template-content-format", "string",
+      "--served-model-name", "dots_ocr",
+      "--trust-remote-code",
+      "--swap-space", "4",
+      "--block-size", "16",
+      "--dtype", "bfloat16"
+    ]
